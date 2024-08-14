@@ -5,7 +5,14 @@
 
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPanel,
+  EuiPopover,
+  EuiSwitch,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -23,6 +30,7 @@ import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../c
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 import './discover_canvas.scss';
 import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/utils/local_storage';
+import { DiscoverActions } from './discover_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
@@ -145,6 +153,20 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     </EuiPopover>
   );
 
+  const discoverActionsRef = useRef<{ registerAction: (action: React.ReactNode) => string } | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (discoverActionsRef.current) {
+      discoverActionsRef.current.registerAction(
+        <EuiButtonEmpty className="dscCanvas_actions" size="s" iconType="lensApp">
+          Generate anomaly detector
+        </EuiButtonEmpty>
+      );
+    }
+  }, [data$, fetchState]);
+
   return (
     <EuiPanel
       panelRef={panelRef}
@@ -171,6 +193,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
         <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
           <MemoizedDiscoverChartContainer {...fetchState} />
           <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+          <DiscoverActions ref={discoverActionsRef} />
           <DiscoverOptions />
         </EuiPanel>
       )}
